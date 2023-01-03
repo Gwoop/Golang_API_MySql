@@ -1,0 +1,12 @@
+use admin;
+
+create table aunt
+(
+ID_aunt int not null auto_increment primary key,
+login varchar (30) not null,
+pass varchar (30) not null
+);
+
+insert into aunt(login, pass)
+values ('admin','admin');
+select * from admin.aunt;
