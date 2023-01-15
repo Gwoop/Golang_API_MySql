@@ -5,6 +5,7 @@ import (
 	"AdminSimpleApi/cmd/security"
 	"encoding/json"
 	"fmt"
+	"github.com/gorilla/mux"
 	"net/http"
 )
 
@@ -48,8 +49,6 @@ func AuthorizationAdmin(handler http.HandlerFunc) http.HandlerFunc {
 //хэндлер для добавления тестовых пользователей
 func AddUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var tokenstruct Structs.Token
-	_ = json.NewDecoder(r.Body).Decode(&tokenstruct) //получение токена (не используется в данныйй момент в программе)
 
 	userst := FakeData() //подставление случаных данных для создания тестового пользователя
 
@@ -73,6 +72,7 @@ func AddUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(result.RowsAffected())                                                                     // количество затронутых строк
 }
 
+//хэндлер для получения всех шаблонов
 func Getdockspattern(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	Sqlconnectionmarlo("marlo")
@@ -88,9 +88,11 @@ func Getdockspattern(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//хэндлер для добавления Шаблона документов
 func Adddockpattern(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	response := Structs.ResponsesSytem{}
+	//response := Structs.ResponsesSytem{}
+	res := ""
 	var requestdockpattern Structs.RequestDockpattern
 	_ = json.NewDecoder(r.Body).Decode(&requestdockpattern)
 
@@ -102,13 +104,87 @@ func Adddockpattern(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	_, err = db.Query("insert into marlo.document (name, description, uuid) values (?,?,?)", requestdockpattern.Name, requestdockpattern.Description, requestdockpattern.Uuid)
-	fmt.Println(err)
 	if err != nil {
-		response.Responses = "Ошибка данных " + err.Error()
-		json.NewEncoder(w).Encode(&response)
+
+		res = "Ошибка данных" + err.Error()
+		ResponsesUser(w, res)
+
+		//response.Responses = "Ошибка данных " + err.Error()
+		//json.NewEncoder(w).Encode(&response)
 		return
 	}
+	res = "Данные успешно добавлены"
+	ResponsesUser(w, res)
+	//response.Responses = "Данные успешно добавлены"
+	//json.NewEncoder(w).Encode(&response)
+}
+
+//хэндлер для удаления Шаблона документов
+func Deletedockpattern(w http.ResponseWriter, r *http.Request) {
+	res := ""
+	vars := mux.Vars(r)
+	w.WriteHeader(http.StatusOK)
+	Sqlconnectionmarlo("marlo")
+	var err error
 	defer db.Close()
-	response.Responses = "Данные успешно добавлены"
+
+	_, err = db.Query("DELETE FROM `marlo`.`document` WHERE (`id` = ?);", vars["id"])
+	//fmt.Fprintf(w, "Category: %v\n", vars["category"])
+	fmt.Println(vars["id"])
+	if err != nil {
+		res = "Ошибка данных" + err.Error()
+		ResponsesUser(w, res)
+		return
+	}
+	res = "Данные успешно удалены или их не было"
+	ResponsesUser(w, res)
+}
+
+func Searchdockspattern(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	Sqlconnectionmarlo("marlo")
+
+	var requestsearchdock Structs.RequestsearchDock
+	_ = json.NewDecoder(r.Body).Decode(&requestsearchdock)
+
+	rows, err := db.Query("SELECT * FROM document WHERE name= ?", requestsearchdock.Namedoc)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		doc := Structs.ResponsesDockpattern{}
+		rows.Scan(&doc.Id, &doc.Name, &doc.Description, &doc.Uuid, &doc.Create_date)
+		json.NewEncoder(w).Encode(&doc)
+	}
+}
+
+func Updatedockpattern(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	vars := mux.Vars(r)
+	w.WriteHeader(http.StatusOK)
+	//response := Structs.ResponsesSytem{}
+	res := ""
+	var requestdockpattern Structs.RequestDockpattern
+	_ = json.NewDecoder(r.Body).Decode(&requestdockpattern)
+	Sqlconnectionmarlo("marlo")
+	var err error
+	defer db.Close()
+
+	_, err = db.Query("UPDATE document SET name = ?, description = ?, uuid = ? WHERE (`id` = ?);", requestdockpattern.Name, requestdockpattern.Description, requestdockpattern.Uuid, vars["id"])
+	if err != nil {
+		res = "Ошибка данных" + err.Error()
+		ResponsesUser(w, res)
+		return
+	}
+	res = "Данные успешно Обновленны"
+	ResponsesUser(w, res)
+}
+
+func ResponsesUser(w http.ResponseWriter, res string) {
+	response := Structs.ResponsesSytem{}
+	w.Header().Set("Content-Type", "application/json")
+	response.Responses = res
 	json.NewEncoder(w).Encode(&response)
 }
