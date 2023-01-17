@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
+	"strconv"
 )
 
 //хэндлел для авторизации
@@ -66,7 +67,6 @@ func AddUser(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	var id, _ = result.LastInsertId()
-
 	json.NewEncoder(w).Encode(Structs.ResponsesUser{Id: id, Login: userst.Tel, Password: userst.Password}) // отправка ответа пользователю
 	fmt.Println(result.LastInsertId())                                                                     // id добавленного объекта
 	fmt.Println(result.RowsAffected())                                                                     // количество затронутых строк
@@ -127,7 +127,6 @@ func Deletedockpattern(w http.ResponseWriter, r *http.Request) {
 	Sqlconnectionmarlo("marlo")
 	var err error
 	defer db.Close()
-
 	_, err = db.Query("DELETE FROM `marlo`.`document` WHERE (`id` = ?);", vars["id"])
 	//fmt.Fprintf(w, "Category: %v\n", vars["category"])
 	fmt.Println(vars["id"])
@@ -161,7 +160,6 @@ func Searchdockspattern(w http.ResponseWriter, r *http.Request) {
 
 func Updatedockpattern(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-
 	vars := mux.Vars(r)
 	w.WriteHeader(http.StatusOK)
 	//response := Structs.ResponsesSytem{}
@@ -180,6 +178,94 @@ func Updatedockpattern(w http.ResponseWriter, r *http.Request) {
 	}
 	res = "Данные успешно Обновленны"
 	ResponsesUser(w, res)
+}
+
+func Getdockstext(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	Sqlconnectionmarlo("marlo")
+	rows, err := db.Query("SELECT * FROM document_text")
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		doc := Structs.ResponsesDockstext{}
+		rows.Scan(&doc.Id, &doc.Id_doc, &doc.Text, &doc.Create_date, &doc.Lang, &doc.Uuid)
+		json.NewEncoder(w).Encode(&doc)
+	}
+}
+
+func Getdockstextbydocid(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	Sqlconnectionmarlo("marlo")
+	vars := mux.Vars(r)
+	rows, err := db.Query("SELECT * FROM document_text WHERE id_doc= ?", vars["id"])
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		doc := Structs.ResponsesDockstext{}
+		rows.Scan(&doc.Id, &doc.Id_doc, &doc.Text, &doc.Create_date, &doc.Lang, &doc.Uuid)
+		json.NewEncoder(w).Encode(&doc)
+
+	}
+}
+
+func Getdockstextbyid(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	Sqlconnectionmarlo("marlo")
+	vars := mux.Vars(r)
+	rows, err := db.Query("SELECT * FROM document_text WHERE id= ?", vars["id"])
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		doc := Structs.ResponsesDockstext{}
+		rows.Scan(&doc.Id, &doc.Id_doc, &doc.Text, &doc.Create_date, &doc.Lang, &doc.Uuid)
+		json.NewEncoder(w).Encode(&doc)
+	}
+}
+
+func Getdockstextactyality(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	Sqlconnectionmarlo("marlo")
+	vars := mux.Vars(r)
+	var err error
+	rows, err := db.Query("SELECT * FROM document_text  WHERE id_doc= ? ORDER BY id DESC LIMIT 1", vars["id"])
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		doc := Structs.ResponsesDockstext{}
+		rows.Scan(&doc.Id, &doc.Id_doc, &doc.Text, &doc.Create_date, &doc.Lang, &doc.Uuid)
+		json.NewEncoder(w).Encode(&doc)
+	}
+
+}
+
+func Adddockstextactyality(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	Sqlconnectionmarlo("marlo")
+	vars := mux.Vars(r)
+	//res := ""
+	var requestdockstext Structs.RequestDockstext
+	_ = json.NewDecoder(r.Body).Decode(&requestdockstext)
+
+	var err error
+	rows, err := db.Exec("insert into document_text (id_doc, text, lang,uuid) values (?,?,?,?)", vars["id"], requestdockstext.Text, requestdockstext.Lang, requestdockstext.Uuid)
+	if err != nil {
+		panic(err)
+
+	}
+	defer db.Close()
+	var id, _ = rows.LastInsertId()
+	res := "Данные успешно добавленны - id записи " + strconv.FormatInt(id, 10)
+	ResponsesUser(w, res)
+
 }
 
 func ResponsesUser(w http.ResponseWriter, res string) {

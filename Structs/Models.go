@@ -55,3 +55,20 @@ type RequestsearchDock struct {
 type ResponsesSytem struct {
 	Responses string `json:"responses"`
 }
+
+//Стуктура ответа для просмотра текстов документов
+type ResponsesDockstext struct {
+	Id          int64  `json:"id"`
+	Id_doc      int64  `json:"id_doc"`
+	Text        string `json:"text"`
+	Create_date string `json:"create_date"`
+	Lang        string `json:"lang"`
+	Uuid        string `json:"uuid"`
+}
+
+//Стуктура ответа для просмотра текстов документов
+type RequestDockstext struct {
+	Text string `json:"text"`
+	Lang string `json:"lang"`
+	Uuid string `json:"uuid"`
+}

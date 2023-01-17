@@ -45,12 +45,17 @@ func main() {
 	Init()
 	fmt.Println("Запущенно")
 	r := mux.NewRouter()
-	r.HandleFunc("/marlo/admin/adduser", AuthorizationAdmin(AddUser)).Methods("Get")                           // добавление тестовых пользователей
-	r.HandleFunc("/marlo/admin/getdocpattern", AuthorizationAdmin(Getdockspattern)).Methods("Get")             // получения списка шаблонов
-	r.HandleFunc("/marlo/admin/adddocpattern", AuthorizationAdmin(Adddockpattern)).Methods("Get")              // создание шаблона
-	r.HandleFunc("/marlo/admin/deletedocpattern/{id}/", AuthorizationAdmin(Deletedockpattern)).Methods("Get")  // удаление шаблона
-	r.HandleFunc("/marlo/admin/searchdockspattern", AuthorizationAdmin(Searchdockspattern)).Methods("Get")     // поиск шаблонов
-	r.HandleFunc("/marlo/admin/updatedockpattern/{id}/", AuthorizationAdmin(Updatedockpattern)).Methods("Get") //обновление шаблона
+	r.HandleFunc("/marlo/admin/adduser", AuthorizationAdmin(AddUser)).Methods("Get")                             // добавление тестовых пользователей
+	r.HandleFunc("/marlo/admin/getdocpattern", AuthorizationAdmin(Getdockspattern)).Methods("Get")               // получения списка шаблонов
+	r.HandleFunc("/marlo/admin/adddocpattern", AuthorizationAdmin(Adddockpattern)).Methods("Post")               // создание шаблона
+	r.HandleFunc("/marlo/admin/deletedocpattern/{id}/", AuthorizationAdmin(Deletedockpattern)).Methods("Delete") // удаление шаблона
+	r.HandleFunc("/marlo/admin/searchdockspattern", AuthorizationAdmin(Searchdockspattern)).Methods("Get")       // поиск шаблонов
+	r.HandleFunc("/marlo/admin/updatedockpattern/{id}/", AuthorizationAdmin(Updatedockpattern)).Methods("Put")   //обновление шаблона
+	r.HandleFunc("/marlo/admin/getdockstext", AuthorizationAdmin(Getdockstext)).Methods("Get")
+	r.HandleFunc("/marlo/admin/getdockstextbydocid/{id}/", AuthorizationAdmin(Getdockstextbydocid)).Methods("Get")
+	r.HandleFunc("/marlo/admin/getdockstextbyid/{id}/", AuthorizationAdmin(Getdockstextbyid)).Methods("Get")
+	r.HandleFunc("/marlo/admin/getdockstextactyality/{id}/", AuthorizationAdmin(Getdockstextactyality)).Methods("Get")
+	r.HandleFunc("/marlo/admin/adddockstextactyality/{id}/", AuthorizationAdmin(Adddockstextactyality)).Methods("Post")
 	log.Fatal(http.ListenAndServe(PortHandler, r))
 
 }
