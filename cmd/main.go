@@ -29,7 +29,6 @@ func Init() {
 	scanner := bufio.NewScanner(file)
 	i := 0
 	for scanner.Scan() {
-
 		filearray[i] = scanner.Text()
 		i++
 	}
@@ -54,9 +53,13 @@ func main() {
 	r.HandleFunc("/marlo/admin/getdockstext", AuthorizationAdmin(Getdockstext)).Methods("Get")
 	r.HandleFunc("/marlo/admin/getdockstextbydocid/{id}/", AuthorizationAdmin(Getdockstextbydocid)).Methods("Get")
 	r.HandleFunc("/marlo/admin/getdockstextbyid/{id}/", AuthorizationAdmin(Getdockstextbyid)).Methods("Get")
-	r.HandleFunc("/marlo/admin/getdockstextactyality/{id}/", AuthorizationAdmin(Getdockstextactyality)).Methods("Get")
-	r.HandleFunc("/marlo/admin/adddockstextactyality/{id}/", AuthorizationAdmin(Adddockstextactyality)).Methods("Post")
-	log.Fatal(http.ListenAndServe(PortHandler, r))
+	r.HandleFunc("/marlo/admin/getdockstextactyality/{id}/", AuthorizationAdmin(GetDocksTextActyality)).Methods("Get")
+	r.HandleFunc("/marlo/admin/adddockstextactyality/{id}/", AuthorizationAdmin(AddDocksTextActyality)).Methods("Post")
+	r.HandleFunc("/marlo/admin/update_status_handler/{name_handler}/", AuthorizationAdmin(UpdateStatusHandler)).Methods("PUT")
+	r.HandleFunc("/marlo/admin/insert_handler/", AuthorizationAdmin(InsertHandler)).Methods("Post")
+	r.HandleFunc("/marlo/admin/delete_handler/{id_handler}", AuthorizationAdmin(DeleteHandler)).Methods("Delete")
+	r.HandleFunc("/marlo/admin/get_handler", AuthorizationAdmin(DeleteHandler)).Methods("Get")
+	log.Fatal(http.ListenAndServe(":8000", r))
 
 }
 
@@ -74,7 +77,6 @@ func Sqlconnectionmarlo(namebd string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	pingErr := db.Ping()
 	if pingErr != nil {
 		log.Fatal(pingErr)

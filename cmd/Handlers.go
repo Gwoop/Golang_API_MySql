@@ -26,7 +26,6 @@ func AuthorizationAdmin(handler http.HandlerFunc) http.HandlerFunc {
 			panic(err)
 		}
 		defer db.Close()
-
 		//проверка логина и пароля администратора из базы данных
 		rows, err := db.Query("select * from admin.aunt")
 		for rows.Next() {
@@ -81,11 +80,38 @@ func Getdockspattern(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	defer rows.Close()
+
+	docc := Structs.ResponsesDockpattern{}
+	doc := []Structs.ResponsesDockpattern{}
 	for rows.Next() {
-		doc := Structs.ResponsesDockpattern{}
-		rows.Scan(&doc.Id, &doc.Name, &doc.Description, &doc.Uuid, &doc.Create_date)
-		json.NewEncoder(w).Encode(&doc)
+		rows.Scan(&docc.Id, &docc.Name, &docc.Description, &docc.Uuid, &docc.Create_date)
+		//json.NewEncoder(w).Encode(&doc)
+		doc = append(doc, docc)
 	}
+	json.NewEncoder(w).Encode(&doc)
+}
+
+func GetHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	Sqlconnectionmarlo("admin")
+	var err error
+	rows, err := db.Query("SELECT * FROM handlers")
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	gethandarr := []Structs.RequestGetHandlers{}
+	gethand := Structs.RequestGetHandlers{}
+
+	for rows.Next() {
+
+		rows.Scan(&gethand.Id, &gethand.NameHandler, &gethand.Status)
+		gethandarr = append(gethandarr, gethand)
+
+	}
+	json.NewEncoder(w).Encode(&gethandarr)
+
 }
 
 //хэндлер для добавления Шаблона документов
@@ -228,7 +254,7 @@ func Getdockstextbyid(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func Getdockstextactyality(w http.ResponseWriter, r *http.Request) {
+func GetDocksTextActyality(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	Sqlconnectionmarlo("marlo")
 	vars := mux.Vars(r)
@@ -247,7 +273,7 @@ func Getdockstextactyality(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func Adddockstextactyality(w http.ResponseWriter, r *http.Request) {
+func AddDocksTextActyality(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	Sqlconnectionmarlo("marlo")
 	vars := mux.Vars(r)
@@ -266,6 +292,59 @@ func Adddockstextactyality(w http.ResponseWriter, r *http.Request) {
 	res := "Данные успешно добавленны - id записи " + strconv.FormatInt(id, 10)
 	ResponsesUser(w, res)
 
+}
+
+func UpdateStatusHandler(w http.ResponseWriter, r *http.Request) {
+	Sqlconnectionmarlo("admin")
+	vars := mux.Vars(r)
+	//res := ""
+	var requesthandler Structs.RequestHandler
+	_ = json.NewDecoder(r.Body).Decode(&requesthandler)
+
+	var err error
+	rows, err := db.Exec("UPDATE handlers SET status = ? WHERE (name_handler = ?);", vars["name_handler"], requesthandler.Status)
+	if err != nil {
+		panic(err)
+
+	}
+	defer db.Close()
+	var id, _ = rows.LastInsertId()
+	res := "Данные хэндлера изменены - id изменённого хэнлера  " + strconv.FormatInt(id, 10)
+	ResponsesUser(w, res)
+}
+
+func InsertHandler(w http.ResponseWriter, r *http.Request) {
+	Sqlconnectionmarlo("admin")
+	//res := ""
+	var requestinserthandler Structs.RequestInsertHandler
+	_ = json.NewDecoder(r.Body).Decode(&requestinserthandler)
+
+	var err error
+	rows, err := db.Exec("insert into handlers (name_handler, status) values (?,?);", requestinserthandler.NameHandler, requestinserthandler.Status)
+	if err != nil {
+		panic(err)
+
+	}
+	defer db.Close()
+	var id, _ = rows.LastInsertId()
+	res := "Данные хэндлера добавленны - id созданного хэнлера  " + strconv.FormatInt(id, 10)
+	ResponsesUser(w, res)
+}
+
+func DeleteHandler(w http.ResponseWriter, r *http.Request) {
+	Sqlconnectionmarlo("admin")
+	vars := mux.Vars(r)
+	var err error
+	rows, err := db.Exec("DELETE FROM handlers WHERE (`id` = ?);", vars["id_handler"])
+	if err != nil {
+		panic(err)
+
+	}
+	defer db.Close()
+	var id, _ = rows.RowsAffected()
+
+	res := "Данные хэндлера удаленны или их не было, задейсвованно строк - " + strconv.FormatInt(id, 10)
+	ResponsesUser(w, res)
 }
 
 func ResponsesUser(w http.ResponseWriter, res string) {

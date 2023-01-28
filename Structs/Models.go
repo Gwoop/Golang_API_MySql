@@ -44,7 +44,7 @@ type RequestDockpattern struct {
 
 //Структура запроса через Id
 type RequestDockid struct {
-	Id string `json:"id"`
+	Id int `json:"id"`
 }
 
 type RequestsearchDock struct {
@@ -71,4 +71,22 @@ type RequestDockstext struct {
 	Text string `json:"text"`
 	Lang string `json:"lang"`
 	Uuid string `json:"uuid"`
+}
+
+type RequestHandler struct {
+	Status int `json:"status"`
+}
+type RequestInsertHandler struct {
+	NameHandler string `json:"namehandler"`
+	Status      int    `json:"status"`
+}
+
+type RequestDeleteHandler struct {
+	Id string `json:"id"`
+}
+
+type RequestGetHandlers struct {
+	Id          int64  `json:"id"`
+	NameHandler string `json:"namehandler"`
+	Status      int    `json:"status"`
 }
