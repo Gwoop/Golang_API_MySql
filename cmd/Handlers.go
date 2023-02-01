@@ -19,7 +19,6 @@ func AuthorizationAdmin(handler http.HandlerFunc) http.HandlerFunc {
 			json.NewEncoder(w).Encode("Ошибка обработки сессии")
 			return
 		}
-		//db, err := sql.Open("mysql", "root:1234@tcp(localhost:3306)/admin") //строка подлючения к бд где хранятся логин и пароль админа
 		Sqlconnectionmarlo("admin")
 		var err error
 		if err != nil {

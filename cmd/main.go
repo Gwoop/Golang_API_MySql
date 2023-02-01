@@ -61,6 +61,7 @@ func main() {
 	r.HandleFunc("/marlo/admin/insert_handler/", AuthorizationAdmin(InsertHandler)).Methods("Post")
 	r.HandleFunc("/marlo/admin/delete_handler/{id_handler}", AuthorizationAdmin(DeleteHandler)).Methods("Delete")
 	r.HandleFunc("/marlo/admin/get_handler", AuthorizationAdmin(DeleteHandler)).Methods("Get")
+	r.Use(loggingMiddleware)
 	err := r.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
 		pathTemplate, err := route.GetPathTemplate()
 		if err == nil {
@@ -98,6 +99,14 @@ func main() {
 		MaxHeaderBytes: 1 << 20,
 	}
 	log.Fatal(s.ListenAndServe())
+}
+
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Базовый лог, в дальнейшем буду делать более подробным
+		log.Println(r.RequestURI)
+		next.ServeHTTP(w, r)
+	})
 }
 
 func Sqlconnectionmarlo(namebd string) {
