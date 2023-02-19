@@ -3,6 +3,7 @@ package main
 import (
 	"AdminSimpleApi/Structs"
 	"github.com/ddosify/go-faker/faker"
+	"github.com/satori/go.uuid"
 	"math/rand"
 )
 
@@ -18,4 +19,14 @@ func FakeData() Structs.User {
 	userst.Email = faker.RandomEmail()              //генерация подставной почты
 	userst.Password = faker.RandomPassword()        //генерация подставного пороля (здесь он в чистом ввиде без хэширования)
 	return userst
+}
+
+func Uuid() uuid.UUID {
+	var err error
+	u1 := uuid.Must(uuid.NewV4(), err)
+	if err != nil {
+
+	}
+
+	return u1
 }

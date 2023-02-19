@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"github.com/go-sql-driver/mysql"
 	_ "github.com/go-sql-driver/mysql"
@@ -42,10 +43,19 @@ func Init() {
 	PathBD = filearray[2]
 }
 
+type Testst struct {
+	Resposnse string `json:"resposnse"`
+}
+
+func Test(w http.ResponseWriter, r *http.Request) {
+	json.NewEncoder(w).Encode(Testst{Resposnse: "Успешно"})
+}
+
 func main() {
 	Init()
 	fmt.Println("Запущенно")
 	r := mux.NewRouter()
+	r.HandleFunc("/marlo/test", Test).Methods("Get")
 	r.HandleFunc("/marlo/admin/adduser", AuthorizationAdmin(AddUser)).Methods("Get")                             // добавление тестовых пользователей
 	r.HandleFunc("/marlo/admin/getdocpattern", AuthorizationAdmin(Getdockspattern)).Methods("Get")               // получения списка шаблонов
 	r.HandleFunc("/marlo/admin/adddocpattern", AuthorizationAdmin(Adddockpattern)).Methods("Post")               // создание шаблона
@@ -60,7 +70,7 @@ func main() {
 	r.HandleFunc("/marlo/admin/update_status_handler/{name_handler}/", AuthorizationAdmin(UpdateStatusHandler)).Methods("PUT")
 	r.HandleFunc("/marlo/admin/insert_handler/", AuthorizationAdmin(InsertHandler)).Methods("Post")
 	r.HandleFunc("/marlo/admin/delete_handler/{id_handler}", AuthorizationAdmin(DeleteHandler)).Methods("Delete")
-	r.HandleFunc("/marlo/admin/get_handler", AuthorizationAdmin(DeleteHandler)).Methods("Get")
+	r.HandleFunc("/marlo/admin/get_handler", AuthorizationAdmin(GetHandler)).Methods("Get")
 	r.Use(loggingMiddleware)
 	err := r.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
 		pathTemplate, err := route.GetPathTemplate()
@@ -102,6 +112,14 @@ func main() {
 }
 
 func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Базовый лог, в дальнейшем буду делать более подробным
+		log.Println(r.RequestURI)
+		next.ServeHTTP(w, r)
+	})
+}
+
+func AutorizeihenMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Базовый лог, в дальнейшем буду делать более подробным
 		log.Println(r.RequestURI)

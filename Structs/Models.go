@@ -39,7 +39,6 @@ type ResponsesDockpattern struct {
 type RequestDockpattern struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
-	Uuid        string `json:"uuid"`
 }
 
 //Структура запроса через Id

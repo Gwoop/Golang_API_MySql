@@ -90,29 +90,6 @@ func Getdockspattern(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(&doc)
 }
 
-func GetHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	Sqlconnectionmarlo("admin")
-	var err error
-	rows, err := db.Query("SELECT * FROM handlers")
-	if err != nil {
-		panic(err)
-	}
-	defer rows.Close()
-
-	gethandarr := []Structs.RequestGetHandlers{}
-	gethand := Structs.RequestGetHandlers{}
-
-	for rows.Next() {
-
-		rows.Scan(&gethand.Id, &gethand.NameHandler, &gethand.Status)
-		gethandarr = append(gethandarr, gethand)
-
-	}
-	json.NewEncoder(w).Encode(&gethandarr)
-
-}
-
 //хэндлер для добавления Шаблона документов
 func Adddockpattern(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -123,12 +100,11 @@ func Adddockpattern(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println(requestdockpattern.Name)
 	fmt.Println(requestdockpattern.Description)
-	fmt.Println(requestdockpattern.Uuid)
 	Sqlconnectionmarlo("marlo")
 	var err error
 	defer db.Close()
 
-	_, err = db.Query("insert into marlo.document (name, description, uuid) values (?,?,?)", requestdockpattern.Name, requestdockpattern.Description, requestdockpattern.Uuid)
+	_, err = db.Query("insert into marlo.document (name, description, uuid) values (?,?,?)", requestdockpattern.Name, requestdockpattern.Description, Uuid())
 	if err != nil {
 
 		res = "Ошибка данных" + err.Error()
@@ -195,7 +171,7 @@ func Updatedockpattern(w http.ResponseWriter, r *http.Request) {
 	var err error
 	defer db.Close()
 
-	_, err = db.Query("UPDATE document SET name = ?, description = ?, uuid = ? WHERE (`id` = ?);", requestdockpattern.Name, requestdockpattern.Description, requestdockpattern.Uuid, vars["id"])
+	_, err = db.Query("UPDATE document SET name = ?, description = ? WHERE (`id` = ?);", requestdockpattern.Name, requestdockpattern.Description, vars["id"])
 	if err != nil {
 		res = "Ошибка данных" + err.Error()
 		ResponsesUser(w, res)
@@ -281,7 +257,7 @@ func AddDocksTextActyality(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewDecoder(r.Body).Decode(&requestdockstext)
 
 	var err error
-	rows, err := db.Exec("insert into document_text (id_doc, text, lang,uuid) values (?,?,?,?)", vars["id"], requestdockstext.Text, requestdockstext.Lang, requestdockstext.Uuid)
+	rows, err := db.Exec("insert into document_text (id_doc, text, lang,uuid) values (?,?,?,?)", vars["id"], requestdockstext.Text, requestdockstext.Lang, Uuid())
 	if err != nil {
 		panic(err)
 
@@ -344,6 +320,29 @@ func DeleteHandler(w http.ResponseWriter, r *http.Request) {
 
 	res := "Данные хэндлера удаленны или их не было, задейсвованно строк - " + strconv.FormatInt(id, 10)
 	ResponsesUser(w, res)
+}
+
+func GetHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	Sqlconnectionmarlo("admin")
+	var err error
+	rows, err := db.Query("SELECT * FROM handlers")
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	gethandarr := []Structs.RequestGetHandlers{}
+	gethand := Structs.RequestGetHandlers{}
+
+	for rows.Next() {
+
+		rows.Scan(&gethand.Id, &gethand.NameHandler, &gethand.Status)
+		gethandarr = append(gethandarr, gethand)
+
+	}
+	json.NewEncoder(w).Encode(&gethandarr)
+
 }
 
 func ResponsesUser(w http.ResponseWriter, res string) {
