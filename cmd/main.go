@@ -71,6 +71,7 @@ func main() {
 	r.HandleFunc("/marlo/admin/insert_handler/", AuthorizationAdmin(InsertHandler)).Methods("Post")
 	r.HandleFunc("/marlo/admin/delete_handler/{id_handler}", AuthorizationAdmin(DeleteHandler)).Methods("Delete")
 	r.HandleFunc("/marlo/admin/get_handler", AuthorizationAdmin(GetHandler)).Methods("Get")
+	r.HandleFunc("/marlo/admin/apply_changes", AuthorizationAdmin(Apply_Changes)).Methods("Post")
 	r.Use(loggingMiddleware)
 	err := r.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
 		pathTemplate, err := route.GetPathTemplate()

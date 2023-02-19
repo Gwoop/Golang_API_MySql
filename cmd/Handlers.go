@@ -3,9 +3,11 @@ package main
 import (
 	"AdminSimpleApi/Structs"
 	"AdminSimpleApi/cmd/security"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -290,7 +292,6 @@ func UpdateStatusHandler(w http.ResponseWriter, r *http.Request) {
 
 func InsertHandler(w http.ResponseWriter, r *http.Request) {
 	Sqlconnectionmarlo("admin")
-	//res := ""
 	var requestinserthandler Structs.RequestInsertHandler
 	_ = json.NewDecoder(r.Body).Decode(&requestinserthandler)
 
@@ -343,6 +344,37 @@ func GetHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	json.NewEncoder(w).Encode(&gethandarr)
 
+}
+
+func Apply_Changes(w http.ResponseWriter, r *http.Request) {
+	Sqlconnectionmarlo("admin")
+	var err error
+	rows, err := db.Query("SELECT * FROM handlers")
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+	gethandarr := []Structs.RequestGetHandlers{}
+	gethand := Structs.RequestGetHandlers{}
+
+	for rows.Next() {
+
+		rows.Scan(&gethand.Id, &gethand.NameHandler, &gethand.Status)
+		gethandarr = append(gethandarr, gethand)
+
+	}
+	bytesRepresentation, err := json.Marshal(&gethandarr)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	resp, err := http.Post("https://httpbin.org/get", "application/json", bytes.NewBuffer(bytesRepresentation))
+	if err != nil {
+		log.Fatalln(err)
+	}
+	var result map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&result)
+	json.NewEncoder(w).Encode(&result)
 }
 
 func ResponsesUser(w http.ResponseWriter, res string) {
