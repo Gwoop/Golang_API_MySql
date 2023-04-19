@@ -12,7 +12,7 @@ import (
 	"strconv"
 )
 
-//хэндлел для авторизации
+// хэндлел для авторизации
 func AuthorizationAdmin(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		login, password, ok := r.BasicAuth() //инициализация базовой авторизации
@@ -47,7 +47,7 @@ func AuthorizationAdmin(handler http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-//хэндлер для добавления тестовых пользователей
+// хэндлер для добавления тестовых пользователей
 func AddUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -72,7 +72,7 @@ func AddUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(result.RowsAffected())                                                                     // количество затронутых строк
 }
 
-//хэндлер для получения всех шаблонов
+// хэндлер для получения всех шаблонов
 func Getdockspattern(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	Sqlconnectionmarlo("marlo")
@@ -92,7 +92,7 @@ func Getdockspattern(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(&doc)
 }
 
-//хэндлер для добавления Шаблона документов
+// хэндлер для добавления Шаблона документов
 func Adddockpattern(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	//response := Structs.ResponsesSytem{}
@@ -122,7 +122,7 @@ func Adddockpattern(w http.ResponseWriter, r *http.Request) {
 	//json.NewEncoder(w).Encode(&response)
 }
 
-//хэндлер для удаления Шаблона документов
+// хэндлер для удаления Шаблона документов
 func Deletedockpattern(w http.ResponseWriter, r *http.Request) {
 	res := ""
 	vars := mux.Vars(r)
@@ -368,7 +368,7 @@ func Apply_Changes(w http.ResponseWriter, r *http.Request) {
 		log.Fatalln(err)
 	}
 
-	resp, err := http.Post("https://httpbin.org/get", "application/json", bytes.NewBuffer(bytesRepresentation))
+	resp, err := http.Post("https://пиздец_нахуй_блэт/post", "application/json", bytes.NewBuffer(bytesRepresentation)) //сюда путь до клиентской api
 	if err != nil {
 		log.Fatalln(err)
 	}

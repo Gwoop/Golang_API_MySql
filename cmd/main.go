@@ -116,7 +116,25 @@ func loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Базовый лог, в дальнейшем буду делать более подробным
 		log.Println(r.RequestURI)
+		t := time.Now()
 		next.ServeHTTP(w, r)
+		Sqlconnectionmarlo("admin")
+		defer db.Close()
+		var err error
+
+		login, _, ok := r.BasicAuth()
+		if !ok {
+			(w).WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode("ты как сюда попал ? Пошёл нахуй!!!!!")
+			return
+		}
+
+		_, err = db.Query("insert into log (admin_login,handler,time) values (?,?,?)", login, r.RequestURI, t.String())
+		if err != nil {
+			log.Println("Ошибка бд")
+			log.Println(err)
+			return
+		}
 	})
 }
 
@@ -125,6 +143,7 @@ func AutorizeihenMiddleware(next http.Handler) http.Handler {
 		// Базовый лог, в дальнейшем буду делать более подробным
 		log.Println(r.RequestURI)
 		next.ServeHTTP(w, r)
+
 	})
 }
 
@@ -146,5 +165,5 @@ func Sqlconnectionmarlo(namebd string) {
 	if pingErr != nil {
 		log.Fatal(pingErr)
 	}
-	fmt.Println("Connected!")
+	//fmt.Println("Connected!")
 }
