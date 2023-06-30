@@ -102,7 +102,7 @@ func main() {
 	}
 
 	s := &http.Server{
-		Addr:           ":8000",
+		Addr:           "192.168.0.12:8080",
 		Handler:        r,
 		ReadTimeout:    5 * time.Second,
 		WriteTimeout:   5 * time.Second,
@@ -121,14 +121,12 @@ func loggingMiddleware(next http.Handler) http.Handler {
 		Sqlconnectionmarlo("admin")
 		defer db.Close()
 		var err error
-
 		login, _, ok := r.BasicAuth()
 		if !ok {
 			(w).WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(w).Encode("ты как сюда попал ? Пошёл нахуй!!!!!")
+			//json.NewEncoder(w).Encode("ты как сюда попал ? Пошёл нахуй!!!!!")
 			return
 		}
-
 		_, err = db.Query("insert into log (admin_login,handler,time) values (?,?,?)", login, r.RequestURI, t.String())
 		if err != nil {
 			log.Println("Ошибка бд")
@@ -140,7 +138,6 @@ func loggingMiddleware(next http.Handler) http.Handler {
 
 func AutorizeihenMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Базовый лог, в дальнейшем буду делать более подробным
 		log.Println(r.RequestURI)
 		next.ServeHTTP(w, r)
 
